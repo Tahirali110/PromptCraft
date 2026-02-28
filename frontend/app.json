@@ -56,14 +56,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "7c222787-bc28-4a01-a213-4e0fe2875054"
+        "projectId": "42da6682-1ee1-433f-b85d-8224c9d3f63a"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/7c222787-bc28-4a01-a213-4e0fe2875054"
-    }
+      "url": "https://u.expo.dev/42da6682-1ee1-433f-b85d-8224c9d3f63a"
+    },
+    "owner": "prompt110"
   }
 }
