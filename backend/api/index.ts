@@ -56,13 +56,13 @@ type AIProvider = 'openai' | 'gemini' | 'anthropic' | 'openrouter';
 
 const requestId: MiddlewareHandler = async (c, next) => {
     const id = crypto.randomUUID();
-    c.req.raw.headers.set('x-request-id', id);
+    c.set('requestId', id);
     await next();
 };
 
 const securityHeaders: MiddlewareHandler = async (c, next) => {
     await next();
-    const reqId = c.req.header('x-request-id') ?? crypto.randomUUID();
+    const reqId = c.get('requestId') ?? crypto.randomUUID();
     c.header('X-Request-Id', reqId);
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('X-Frame-Options', 'DENY');
