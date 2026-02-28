@@ -3,6 +3,7 @@
  * Hono server with security middleware, rate limiting, and AI proxy routes.
  */
 import { Hono } from 'hono';
+import { handle } from 'hono/vercel';
 import { cors } from 'hono/cors';
 import { CONFIG } from './config';
 import { requestId, securityHeaders, bodySizeLimit } from './middleware/security';
@@ -107,8 +108,10 @@ app.notFound((c) => {
 
 // ─── Export ────────────────────────────────────────────────────────────────────
 
-export default {
-  fetch: app.fetch,
-  port: CONFIG.PORT,
-  hostname: '0.0.0.0',
-};
+export default process.env.VERCEL
+  ? handle(app)
+  : {
+    fetch: app.fetch,
+    port: CONFIG.PORT,
+    hostname: '0.0.0.0',
+  };
