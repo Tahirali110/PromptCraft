@@ -1,0 +1,35 @@
+{
+  "name": "promptcraft-backend",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "dev:tunnel": "concurrently \"bun run dev\" \"node scripts/start-ngrok-cli.js\" \"node scripts/setup-ngrok-env.js\"",
+    "build": "bun run build.js",
+    "start": "node dist/index.js",
+    "lint": "eslint \"**/*.{js,ts}\" && prettier -c \"**/*.{js,ts,json}\"",
+    "format": "eslint \"**/*.{js,ts}\" --fix && prettier \"**/*.{js,ts,json}\" --write",
+    "typecheck": "tsc --noEmit",
+    "vercel-build": "bun run build"
+  },
+  "dependencies": {
+    "@google/genai": "^1.3.0",
+    "@hono/zod-validator": "^0.7.4",
+    "@supabase/supabase-js": "^2.75.0",
+    "hono": "^4.9.10",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.25.1",
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "concurrently": "^9.2.1",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "ngrok": "^5.0.0-beta.2",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.6.2"
+  }
+}

@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+.tsbuildinfo
+
+# Bun
+bun.lockb
+.bun/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime / OS
+.DS_Store
+Thumbs.db
+
+# Editor / tooling
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Environment — NEVER push
+.env
+.env.local
+.env.*
+!.env.example
+
+# Keys
+*.jks
+*.p8
+*.p12
+*.key

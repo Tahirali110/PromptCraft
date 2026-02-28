@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment — NEVER push these
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Orchids (dev tool)
+.orchids/
+
+# Expo / React Native
+.expo/
+android/
+ios/
+web-build/
+
+# Lock files (regenerated on install)
+bun.lock
+bun.lockb
+
+# Debug
+debug.log
+
+# EAS
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*

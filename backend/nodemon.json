@@ -1,0 +1,7 @@
+{
+  "watch": ["src", ".env", ".env.*"],
+  "ext": "ts,js,json",
+  "ignore": ["node_modules"],
+  "exec": "bun run src/index.ts",
+  "legacyWatch": true
+}
