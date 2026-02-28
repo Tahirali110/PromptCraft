@@ -3,9 +3,6 @@
  * Vercel Serverless Function entry point.
  * Self-contained: imports the Hono app and exports Vercel handler.
  */
-export const config = {
-    runtime: 'nodejs',
-};
 
 // Re-export everything inline to avoid ESM module resolution issues
 import { Hono } from 'hono';
