@@ -1,15 +1,17 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "npm install",
+    "installCommand": "npm install",
     "builds": [
         {
-            "src": "src/index.ts",
+            "src": "api/index.ts",
             "use": "@vercel/node"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "src/index.ts"
+            "dest": "api/index.ts"
         }
     ]
 }
