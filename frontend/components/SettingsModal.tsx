@@ -31,53 +31,32 @@ import { useTheme } from '@/lib/themeContext';
 // ─── Storage keys ─────────────────────────────────────────────────────────────
 const KEY_API_KEY = 'promptcraft_api_key';
 const KEY_PROVIDER = 'promptcraft_provider';
-const KEY_OR_MODEL = 'promptcraft_or_model';
-
-// ─── OpenRouter model list ────────────────────────────────────────────────────
-export const OPENROUTER_MODELS: { value: string; label: string; description: string }[] = [
-  { value: 'openai/gpt-4o', label: 'GPT-4o', description: 'OpenAI — fast & capable' },
-  { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', description: 'OpenAI — cheap & fast' },
-  { value: 'openai/gpt-5.2', label: 'GPT-5.2', description: 'OpenAI — most capable' },
-  { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet', description: 'Anthropic — balanced' },
-  { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', description: 'Anthropic — most powerful' },
-  { value: 'google/gemini-2.0-flash-001', label: 'Gemini 2.0 Flash', description: 'Google — fast & cheap' },
-  { value: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5', description: 'Google — long context' },
-  { value: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', description: 'Meta — open source' },
-  { value: 'deepseek/deepseek-chat-v3-0324', label: 'DeepSeek V3', description: 'DeepSeek — very cheap' },
-  { value: 'mistralai/mistral-large', label: 'Mistral Large', description: 'Mistral — European AI' },
-];
-
-export const DEFAULT_OR_MODEL = 'openai/gpt-4o';
 
 // ─── Persistence helpers ──────────────────────────────────────────────────────
 export async function getStoredSettings(): Promise<{
   provider: AIProvider;
   apiKey: string;
-  orModel: string;
 }> {
   try {
-    const [p, k, m] = await Promise.all([
+    const [p, k] = await Promise.all([
       AsyncStorage.getItem(KEY_PROVIDER),
       AsyncStorage.getItem(KEY_API_KEY),
-      AsyncStorage.getItem(KEY_OR_MODEL),
     ]);
     return {
       provider: (p as AIProvider) ?? 'openai',
       apiKey: k ?? '',
-      orModel: m ?? DEFAULT_OR_MODEL,
     };
   } catch {
-    return { provider: 'openai', apiKey: '', orModel: DEFAULT_OR_MODEL };
+    return { provider: 'openai', apiKey: '' };
   }
 }
 
-async function saveSettings(provider: AIProvider, apiKey: string, orModel: string) {
+async function saveSettings(provider: AIProvider, apiKey: string) {
   await Promise.all([
     AsyncStorage.setItem(KEY_PROVIDER, provider),
     apiKey.trim()
       ? AsyncStorage.setItem(KEY_API_KEY, apiKey.trim())
       : AsyncStorage.removeItem(KEY_API_KEY),
-    AsyncStorage.setItem(KEY_OR_MODEL, orModel),
   ]);
 }
 
@@ -98,19 +77,17 @@ interface SettingsModalProps {
 export function useSettings() {
   const [provider, setProvider] = React.useState<AIProvider>('openai');
   const [apiKey, setApiKey] = React.useState('');
-  const [orModel, setOrModel] = React.useState(DEFAULT_OR_MODEL);
 
   const refresh = React.useCallback(() => {
-    getStoredSettings().then(({ provider: p, apiKey: k, orModel: m }) => {
+    getStoredSettings().then(({ provider: p, apiKey: k }) => {
       setProvider(p);
       setApiKey(k);
-      setOrModel(m);
     });
   }, []);
 
   React.useEffect(() => { refresh(); }, [refresh]);
 
-  return { provider, apiKey, orModel, hasKey: apiKey.length > 0, refresh };
+  return { provider, apiKey, hasKey: apiKey.length > 0, refresh };
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -120,11 +97,9 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
 
   const [provider, setProvider] = React.useState<AIProvider>('openai');
   const [apiKey, setApiKey] = React.useState('');
-  const [orModel, setOrModel] = React.useState(DEFAULT_OR_MODEL);
   const [showKey, setShowKey] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
   const [providerMenuOpen, setProviderMenuOpen] = React.useState(false);
-  const [modelMenuOpen, setModelMenuOpen] = React.useState(false);
 
   // Animation values
   const translateY = useSharedValue(600);
@@ -173,13 +148,11 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
   React.useEffect(() => {
     if (visible) {
       setModalMounted(true);
-      getStoredSettings().then(({ provider: p, apiKey: k, orModel: m }) => {
+      getStoredSettings().then(({ provider: p, apiKey: k }) => {
         setProvider(p);
         setApiKey(k);
-        setOrModel(m);
         setSaved(false);
         setShowKey(false);
-        setModelMenuOpen(false);
         setProviderMenuOpen(false);
       });
       // Animate in
@@ -209,7 +182,7 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
     : '';
 
   const handleSave = async () => {
-    await saveSettings(provider, apiKey, orModel);
+    await saveSettings(provider, apiKey);
     setSaved(true);
     setTimeout(() => {
       setSaved(false);
@@ -219,7 +192,7 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
 
   const handleClear = async () => {
     setApiKey('');
-    await saveSettings(provider, '', orModel);
+    await saveSettings(provider, '');
   };
 
   if (!modalMounted && !visible) return null;
@@ -385,59 +358,6 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
             )}
           </View>
 
-          {/* OpenRouter Model Picker */}
-          {provider === 'openrouter' && (
-            <View style={{ gap: 8 }}>
-              <Text style={{ color: C.subtext, fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                Model
-              </Text>
-              <TouchableOpacity
-                onPress={() => setModelMenuOpen((v) => !v)}
-                style={{
-                  borderRadius: 10, borderWidth: 1,
-                  borderColor: modelMenuOpen ? C.purple : C.border,
-                  backgroundColor: C.inputBg, padding: 14,
-                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={{ color: C.text, fontSize: 14, fontWeight: '600' }}>
-                    {OPENROUTER_MODELS.find((m) => m.value === orModel)?.label ?? orModel}
-                  </Text>
-                  <Text style={{ color: C.subtext, fontSize: 11 }}>
-                    {OPENROUTER_MODELS.find((m) => m.value === orModel)?.description ?? ''}
-                  </Text>
-                </View>
-                <Text style={{ color: C.subtext, fontSize: 12, marginLeft: 8 }}>{modelMenuOpen ? '▲' : '▼'}</Text>
-              </TouchableOpacity>
-              {modelMenuOpen && (
-                <ScrollView
-                  style={{ maxHeight: 220, borderRadius: 10, borderWidth: 1, borderColor: C.border, backgroundColor: C.bg }}
-                  nestedScrollEnabled
-                >
-                  {OPENROUTER_MODELS.map((m, i) => (
-                    <TouchableOpacity
-                      key={m.value}
-                      onPress={() => { setOrModel(m.value); setModelMenuOpen(false); }}
-                      style={{
-                        padding: 14, backgroundColor: orModel === m.value ? C.purpleDim : 'transparent',
-                        borderTopWidth: i === 0 ? 0 : 1, borderTopColor: C.border,
-                        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                      }}
-                    >
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text style={{ color: orModel === m.value ? C.purple : C.text, fontSize: 14, fontWeight: orModel === m.value ? '700' : '400' }}>
-                          {m.label}
-                        </Text>
-                        <Text style={{ color: C.subtext, fontSize: 11 }}>{m.description}</Text>
-                      </View>
-                      {orModel === m.value && <Text style={{ color: C.purple, fontSize: 16 }}>✓</Text>}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </View>
-          )}
 
           {/* API Key */}
           <View style={{ gap: 8 }}>

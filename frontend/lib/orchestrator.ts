@@ -82,7 +82,6 @@ export async function callProvider(
   systemPrompt: string,
   userMessage: string,
   history: { role: 'user' | 'assistant'; content: string }[] = [],
-  orModel?: string
 ): Promise<string> {
   const res = await fetchWithRetry(`${BACKEND_URL}/api/v1/ai/chat`, {
     method: 'POST',
@@ -93,7 +92,6 @@ export async function callProvider(
       systemPrompt,
       userMessage,
       history,
-      model: orModel,
     }),
   });
 
@@ -188,7 +186,6 @@ export interface RunOrchestrationOptions {
   provider: AIProvider;
   apiKey: string;
   onProgress: ProgressCallback;
-  orModel?: string;
   /** Already-completed steps to resume from — pass when retrying a failed phase */
   existingSteps?: StepResult[];
   /** Called after each step completes, so caller can persist progress */
@@ -200,7 +197,6 @@ export async function runOrchestration(
   providerArg?: AIProvider,
   apiKeyArg?: string,
   onProgressArg?: ProgressCallback,
-  orModelArg?: string
 ): Promise<OrchestrationResult> {
   // Support both old call signature and new options object
   let opts: RunOrchestrationOptions;
@@ -210,13 +206,12 @@ export async function runOrchestration(
       provider: providerArg!,
       apiKey: apiKeyArg!,
       onProgress: onProgressArg!,
-      orModel: orModelArg,
     };
   } else {
     opts = ideaOrOptions;
   }
 
-  const { idea, provider, apiKey, onProgress, orModel, existingSteps = [], onStepComplete } = opts;
+  const { idea, provider, apiKey, onProgress, existingSteps = [], onStepComplete } = opts;
 
   const steps: StepResult[] = [...existingSteps];
   const startIndex = steps.length; // resume from failed step
@@ -239,7 +234,6 @@ export async function runOrchestration(
       config.systemPrompt,
       userMessage,
       [],
-      orModel
     );
 
     const stepResult: StepResult = { step: i + 1, label: config.label, content };

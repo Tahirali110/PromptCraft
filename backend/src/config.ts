@@ -44,7 +44,7 @@ export const CONFIG = {
     /** Default models per provider */
     DEFAULT_MODELS: {
         openai: 'gpt-4o',
-        openrouter: 'openai/gpt-4o',
+        openrouter: 'openai/gpt-oss-120b:free',
         anthropic: 'claude-3-5-sonnet-20241022',
         gemini: 'gemini-1.5-flash',
     },

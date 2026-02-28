@@ -6,7 +6,8 @@
 
 // Re-export everything inline to avoid ESM module resolution issues
 import { Hono } from 'hono';
-import { handle } from 'hono/vercel';
+// hono/vercel handle() removed — caused 504 on Node.js runtime (stream never resolves)
+// Using direct Node.js handler bridge instead
 import { cors } from 'hono/cors';
 import type { MiddlewareHandler } from 'hono';
 import { GoogleGenAI } from '@google/genai';
@@ -39,7 +40,7 @@ const CONFIG = {
     } as Record<string, string>,
     DEFAULT_MODELS: {
         openai: 'gpt-4o',
-        openrouter: 'openai/gpt-4o',
+        openrouter: 'openai/gpt-oss-120b:free',
         anthropic: 'claude-3-5-sonnet-20241022',
         gemini: 'gemini-1.5-flash',
     } as Record<string, string>,
@@ -228,4 +229,43 @@ app.onError((err, c) => {
 });
 app.notFound((c) => c.json({ error: { code: 'NOT_FOUND', message: `Route ${c.req.method} ${c.req.path} not found` } }, 404));
 
-export default handle(app);
+// ─── Vercel Node.js Handler (direct bridge — fixes 504 timeout) ──────────────
+const handler = async (req: any, res: any): Promise<void> => {
+    try {
+        // Build full URL
+        const protocol = (req.headers['x-forwarded-proto'] as string) ?? 'https';
+        const host = (req.headers['x-forwarded-host'] as string) ?? req.headers.host ?? 'localhost';
+        const url = `${protocol}://${host}${req.url ?? '/'}`;
+
+        // Copy headers
+        const headers = new Headers();
+        for (const [key, val] of Object.entries(req.headers as Record<string, string | string[]>)) {
+            if (val !== undefined) {
+                headers.set(key, Array.isArray(val) ? val.join(', ') : val);
+            }
+        }
+
+        // Reconstruct body (Vercel body-parser already parsed it, so re-stringify)
+        const method: string = req.method ?? 'GET';
+        let body: string | undefined;
+        if (!['GET', 'HEAD'].includes(method) && req.body !== undefined) {
+            body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+        }
+
+        // Create Web API Request and run through Hono
+        const request = new Request(url, { method, headers, body });
+        const response = await app.fetch(request);
+
+        // Write response back to Vercel
+        res.status(response.status);
+        response.headers.forEach((value: string, key: string) => res.setHeader(key, value));
+        const text = await response.text();
+        res.end(text);
+    } catch (err: any) {
+        console.error(JSON.stringify({ level: 'error', event: 'handler_error', message: err.message }));
+        res.status(500).end(JSON.stringify({ error: { code: 'HANDLER_ERROR', message: 'Internal server error' } }));
+    }
+};
+
+export default handler;
+module.exports = handler;

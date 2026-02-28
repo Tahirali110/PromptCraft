@@ -188,7 +188,7 @@ function StepRow({
 export default function DashboardScreen() {
   const { isDark, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { provider, apiKey, hasKey, orModel, refresh: refreshSettings } = useSettings();
+  const { provider, apiKey, hasKey, refresh: refreshSettings } = useSettings();
   const router = useRouter();
 
   const [idea, setIdea] = React.useState('');
@@ -350,7 +350,6 @@ export default function DashboardScreen() {
         provider,
         apiKey,
         onProgress: (step, _label) => setCurrentStep(step),
-        orModel,
         existingSteps,
         onStepComplete: (step, allSteps) => {
           const partialResult = { idea: fullIdea, provider, timestamp, steps: allSteps };
@@ -529,9 +528,7 @@ export default function DashboardScreen() {
                       }}
                     >
                       <Text style={{ color: C.purple, fontSize: 11, fontWeight: '700' }}>
-                        {provider === 'openrouter'
-                          ? (orModel.split('/')[1] ?? orModel)
-                          : provider.charAt(0).toUpperCase() + provider.slice(1)}
+                        {provider.charAt(0).toUpperCase() + provider.slice(1)}
                       </Text>
                     </View>
                   )}

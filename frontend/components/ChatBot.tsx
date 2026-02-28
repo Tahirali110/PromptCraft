@@ -166,7 +166,7 @@ export function ChatBot({
   onProjectToRefineConsumed,
 }: ChatBotProps) {
   const { isDark } = useTheme();
-  const { provider, apiKey, orModel } = useSettings();
+  const { provider, apiKey } = useSettings();
   const insets = useSafeAreaInsets();
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
 
@@ -420,7 +420,7 @@ export function ChatBot({
 
       const response = await callProvider(
         provider, apiKey, systemPrompt, userMsg,
-        updatedMessages.slice(0, -1), orModel
+        updatedMessages.slice(0, -1),
       );
 
       const finalMessages: ChatMessage[] = [...updatedMessages, { role: 'assistant', content: response }];
@@ -458,7 +458,7 @@ export function ChatBot({
         provider, apiKey,
         `Summarize this brainstorming conversation into a concise detailed app idea (2-4 sentences). Include: app type, target users, key features, monetization, platform, tech preferences. Return ONLY the description, no preamble.`,
         `Conversation:\n\n${conversationText}\n\nSummarize:`,
-        [], orModel
+        [],
       );
       onGenerateFromChat(summary.trim());
       setScreen('fab');
