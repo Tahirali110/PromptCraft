@@ -182,13 +182,7 @@ app.use('*', loggerMw);
 app.use('*', securityHeaders);
 app.use('*', cors({
     credentials: true,
-    origin: (origin) => {
-        if (!origin) return '*';
-        if (CONFIG.IS_DEV) return origin;
-        if (CONFIG.ALLOWED_ORIGINS.includes(origin)) return origin;
-        if (origin.startsWith('http://localhost:')) return origin;
-        return null as unknown as string;
-    },
+    origin: '*',
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86400,
